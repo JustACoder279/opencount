@@ -38,17 +38,14 @@ npm install -g openclaw
 
 Requires Node 22+. Verify with `openclaw --version`.
 
-### Step 2 — Clone this repo into your openclaw extensions directory
+### Step 2 — Add the opencount plugin to your openclaw checkout
 
-openclaw discovers plugins from its `extensions/` directory at install time. The easiest path is to find your openclaw source checkout and drop this plugin in:
+openclaw loads plugins from its `extensions/` directory. opencount ships the plugin at `extensions/book/`, so copy that one folder into your openclaw **source checkout** and build — don't clone the whole repo into `extensions/`:
 
 ```bash
-# Option A — clone directly as the book extension
-git clone https://github.com/opencount/opencount ~/.openclaw-src/extensions/book
-
-# Option B — if you have the openclaw source repo checked out
-cd /path/to/openclaw-source
-git clone https://github.com/opencount/opencount extensions/book
+# Run these from the root of your openclaw source checkout
+git clone https://github.com/JustACoder279/opencount /tmp/opencount
+cp -r /tmp/opencount/extensions/book extensions/book
 pnpm install
 pnpm build
 ```
