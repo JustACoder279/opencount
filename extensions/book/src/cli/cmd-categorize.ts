@@ -38,7 +38,8 @@ export function registerCategorizeCmd(book: Command): void {
           const pct = Math.round((done / total) * 100);
           if (pct !== lastPct) {
             lastPct = pct;
-            const bar  = "█".repeat(Math.floor(pct / 3)) + "░".repeat(34 - Math.floor(pct / 3));
+            const filled = Math.min(Math.round(pct / 3), 34);
+          const bar  = "█".repeat(filled) + "░".repeat(34 - filled);
             spinner.text = `${chalk.green(bar)} ${pct}% (${done}/${total})`;
           }
         },

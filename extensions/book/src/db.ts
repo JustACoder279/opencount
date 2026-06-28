@@ -62,6 +62,9 @@ const MIGRATIONS = [
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
   )`,
+  // Unique index on source_id so INSERT OR IGNORE actually deduplicates CSV re-imports.
+  // Partial index excludes NULLs (manual transactions have no source_id).
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_oc_tx_source_id ON oc_transactions(source_id) WHERE source_id IS NOT NULL`,
 ];
 
 export const DEFAULT_CATEGORIES: Record<string, string[]> = {
@@ -97,15 +100,27 @@ export function resolveBookDbPath(): string {
   return join(bookDir, "opencount.sqlite");
 }
 
+function runMigrations(db: Database.Database): void {
+  db.exec(
+    `CREATE TABLE IF NOT EXISTS oc_schema_version (version INTEGER NOT NULL)`,
+  );
+  const row = db
+    .prepare("SELECT MAX(version) as v FROM oc_schema_version")
+    .get() as { v: number | null };
+  const current = row?.v ?? 0;
+  for (let i = current; i < MIGRATIONS.length; i++) {
+    db.exec(MIGRATIONS[i]!);
+    db.prepare("INSERT INTO oc_schema_version (version) VALUES (?)").run(i + 1);
+  }
+}
+
 export function openBookDb(): Database.Database {
   if (_db) return _db;
   const dbPath = resolveBookDbPath();
   const db = new Database(dbPath);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
-  for (const migration of MIGRATIONS) {
-    db.exec(migration);
-  }
+  runMigrations(db);
   _db = db;
   return db;
 }

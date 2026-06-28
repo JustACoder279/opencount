@@ -25,14 +25,17 @@ function normalizeAmount(raw: string): number {
 }
 
 function parseDate(raw: string): string {
+  // Check MM/DD/YYYY first — the Date constructor parses this as local midnight,
+  // which toISOString() shifts to UTC and can roll the date back one day in
+  // US/western timezones. Build the ISO string directly from the parts instead.
+  const slashed = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (slashed) {
+    return `${slashed[3]}-${slashed[1]!.padStart(2, "0")}-${slashed[2]!.padStart(2, "0")}`;
+  }
+  // ISO-like strings (YYYY-MM-DD) are parsed as UTC by the Date constructor, safe to use.
   const d = new Date(raw);
   if (!Number.isNaN(d.getTime())) {
     return d.toISOString().slice(0, 10);
-  }
-  // Try MM/DD/YYYY
-  const m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m) {
-    return `${m[3]}-${m[1]!.padStart(2, "0")}-${m[2]!.padStart(2, "0")}`;
   }
   return raw;
 }

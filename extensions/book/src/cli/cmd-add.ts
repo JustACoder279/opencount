@@ -21,9 +21,16 @@ export function registerAddCmd(book: Command): void {
     }) => {
       const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-      const date = opts.date ?? (await rl.question(
+      const dateInput = opts.date ?? (await rl.question(
         chalk.cyan("Date") + chalk.dim(" [today]: "),
       )) || new Date().toISOString().slice(0, 10);
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateInput) || Number.isNaN(new Date(dateInput).getTime())) {
+        rl.close();
+        console.error(chalk.red("  Invalid date. Use YYYY-MM-DD format (e.g. 2024-01-15)."));
+        process.exit(1);
+      }
+      const date = dateInput;
 
       const amountRaw = opts.amount ?? await rl.question(chalk.cyan("Amount") + chalk.dim(" (negative = expense): "));
       const amount    = Number.parseFloat(amountRaw.replace(/[$,]/g, ""));

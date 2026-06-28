@@ -27,7 +27,10 @@ Pharmacy, Flights, Hotels, Rent, Mortgage, Salary, Freelance, Investment Returns
 Bank Transfer, Credit Card Payment, Miscellaneous
 
 Rules:
-- Positive amounts → Income category
+- Use the description to determine the category — do not rely on the sign of the amount alone.
+- Reserve the Income category for actual income sources: salary, payroll, freelance payments, dividends, rental income, interest earned.
+- Positive amounts that are refunds, cashback, credits, or reimbursements belong in their original expense category (e.g. Shopping) or Transfers — not Income.
+- Negative amounts are typically expenses; categorize by the merchant or description.
 - Return only JSON: {"results":[{"category":"...","subcategory":"..." or null,"confidence":0.0-1.0},...]}
 - Match array index to input index`;
 
@@ -93,7 +96,7 @@ export async function categorizeTransactions(
       results.push({
         category: item?.category ?? "Other",
         subcategory: item?.subcategory ?? null,
-        confidence: item?.confidence ?? 0.7,
+        confidence: item?.confidence ?? 0,
       });
     }
 
